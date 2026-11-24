@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JobGuard - Fake Job Detector</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#070b14;--card:#0f1626;--line:#1e2a44;--text:#e6ebf5;--mut:#8b97b3;--acc:#22d3ee;--acc2:#8b5cf6;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:-apple-system,"Segoe UI",Inter,Arial,sans-serif;color:var(--text);min-height:100vh;background:var(--bg);overflow-x:hidden}
+.orb{position:fixed;border-radius:50%;filter:blur(90px);opacity:.35;z-index:-1;animation:float 14s ease-in-out infinite}
+.o1{width:420px;height:420px;background:var(--acc2);top:-120px;left:-100px}
+.o2{width:380px;height:380px;background:var(--acc);top:-80px;right:-120px;animation-delay:-6s}
+@keyframes float{50%{transform:translate(40px,60px) scale(1.1)}}
+nav{max-width:1150px;margin:0 auto;padding:22px 20px;display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem}
+.logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;color:#071018}
+.hero{max-width:1150px;margin:6px auto 22px;padding:0 20px}
+.hero h1{margin:0;font-size:clamp(2rem,5vw,3.1rem);line-height:1.1;letter-spacing:-.02em}
+.hero h1 span{background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--mut);max-width:580px;margin:12px 0 0;font-size:1.05rem}
+.starters{max-width:1150px;margin:0 auto 18px;padding:0 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.st{background:rgba(15,22,38,.8);border:1px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;text-align:left;color:var(--text);font:inherit;transition:.2s}
+.st:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:0 10px 30px rgba(34,211,238,.12)}
+.st b{display:block;margin-bottom:2px}.st small{color:var(--mut)}
+.wrap{max-width:1150px;margin:0 auto 60px;padding:0 20px;display:grid;grid-template-columns:1.45fr 1fr;gap:22px;align-items:start}
+.card{background:rgba(15,22,38,.88);border:1px solid var(--line);border-radius:18px;padding:22px;backdrop-filter:blur(8px)}
+.head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+h2{margin:0;font-size:1.05rem}
+.sub{color:var(--mut);font-size:.85rem;margin:4px 0 0}
+.ring{--p:0;width:54px;height:54px;border-radius:50%;background:conic-gradient(var(--acc) calc(var(--p)*1%),#1a2440 0);display:grid;place-items:center;flex:none;transition:.3s}
+.ring i{width:42px;height:42px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-style:normal;font-size:.72rem;font-weight:700}
+label{display:flex;justify-content:space-between;font-weight:600;font-size:.76rem;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 6px}
+label em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:500;opacity:.8}
+input[type=text],textarea,select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font:inherit;color:var(--text);background:#0a1120;outline:none;transition:.15s}
+textarea{resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(34,211,238,.15)}
+.bad-in{border-color:var(--bad)!important;animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+::placeholder{color:#55627f}
+select option{background:#0a1120}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.checks{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.chip{display:flex;justify-content:flex-start;text-transform:none;letter-spacing:0;font-weight:500;color:var(--text);align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;cursor:pointer;font-size:.88rem;background:#0a1120;transition:.15s;user-select:none}
+.chip:hover{border-color:var(--acc)}
+.chip input{accent-color:var(--acc)}
+.chip.on{border-color:var(--acc);background:rgba(34,211,238,.1)}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;align-items:center}
+button.p,button.g{border:0;padding:13px 22px;border-radius:12px;font:inherit;font-weight:700;cursor:pointer;transition:.15s}
+button:active{transform:scale(.97)}
+.p{background:linear-gradient(90deg,var(--acc),var(--acc2));color:#06101a}
+.p:hover{filter:brightness(1.1);box-shadow:0 8px 26px rgba(139,92,246,.35)}
+.p:disabled{opacity:.6;cursor:wait}
+.g{background:transparent;color:var(--text);border:1px solid var(--line)!important}
+.g:hover{border-color:var(--acc)!important;color:var(--acc)}
+.kbd{color:var(--mut);font-size:.78rem;margin-left:auto}
+#err{color:#f87171;font-size:.9rem;margin-top:12px;min-height:1em}
+.side{display:grid;gap:18px;position:sticky;top:16px}
+.bar{height:10px;border-radius:99px;background:#1a2440;overflow:hidden;margin:14px 0 6px}
+.bar i{display:block;height:100%;width:0;border-radius:99px;transition:width .5s,background .3s;background:var(--ok)}
+.lvl{display:flex;justify-content:space-between;font-size:.82rem;color:var(--mut)}
+.lvl b{color:var(--text)}
+ul{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+li.flag{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:10px 12px;font-size:.88rem;animation:pop .3s}
+li.flag b{display:block;margin-bottom:4px}
+.hit{display:inline-block;background:rgba(239,68,68,.18);color:#fca5a5;border-radius:6px;padding:2px 8px;font-size:.78rem;margin:2px 4px 0 0}
+li.chk{display:flex;gap:10px;align-items:center;font-size:.86rem;color:var(--mut);transition:.2s}
+li.chk .dot{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:.7rem;flex:none}
+li.chk.ok{color:var(--text)}li.chk.ok .dot{background:var(--ok);border-color:var(--ok);color:#04110a}
+.clean{color:#4ade80;font-size:.88rem;margin-top:12px}
+@keyframes pop{from{opacity:0;transform:scale(.94)}}
+.res{text-align:center}
+.scan{padding:24px 6px}
+.beam{height:70px;border-radius:12px;position:relative;overflow:hidden;background:repeating-linear-gradient(0deg,#0a1120 0 8px,#0d1730 8px 16px);border:1px solid var(--line)}
+.beam:after{content:"";position:absolute;left:0;right:0;height:26px;background:linear-gradient(transparent,rgba(34,211,238,.5),transparent);animation:sweep 1s linear infinite}
+@keyframes sweep{from{top:-26px}to{top:70px}}
+#step{margin-top:14px;color:var(--acc);font-weight:600}
+.gauge{--p:0;--c:#22c55e;width:190px;height:190px;border-radius:50%;margin:14px auto;display:grid;place-items:center;background:conic-gradient(var(--c) calc(var(--p)*1%),#1a2440 0)}
+.gauge .in{width:152px;height:152px;border-radius:50%;background:var(--card);display:grid;place-items:center;align-content:center}
+.gauge b{font-size:2.4rem;line-height:1}.gauge small{color:var(--mut);font-size:.75rem;margin-top:4px}
+.verdict{display:inline-block;padding:9px 18px;border-radius:999px;font-weight:700}
+.safe{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.4)}
+.risky{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.4)}
+.fraud{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.4)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.split div{background:#0a1120;border:1px solid var(--line);border-radius:12px;padding:12px}
+.split small{display:block;color:var(--mut);font-size:.72rem}.split b{font-size:1.2rem}
+.note{color:var(--mut);font-size:.75rem;margin-top:14px}
+.hist{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.hist button{border:1px solid var(--line);background:#0a1120;color:var(--text);border-radius:10px;padding:6px 10px;font:inherit;font-size:.78rem;cursor:pointer}
+.hist button:hover{border-color:var(--acc)}
+.hist span{font-weight:700;margin-left:6px}
+@media(max-width:860px){.wrap,.starters{grid-template-columns:1fr}.row{grid-template-columns:1fr}.side{position:static}}
+</style></head><body>
+<div class="orb o1"></div><div class="orb o2"></div>
+<nav><div class="logo">&#10003;</div>JobGuard</nav>
+<div class="hero"><h1>Spot <span>fake job postings</span><br>before they spot you.</h1>
+<p>Paste a listing and watch the scanner flag scam phrases live. Then run the NLP model for a risk score.</p></div>
+
+<div class="starters">
+<button class="st" onclick="demo(1)"><b>&#128680; Load a scam example</b><small>Fees, bank details, fake urgency</small></button>
+<button class="st" onclick="demo(0)"><b>&#9989; Load a real example</b><small>Clear role, real requirements</small></button>
+<button class="st" onclick="demo(2)"><b>&#129529; Start blank</b><small>Paste your own posting</small></button>
+</div>
+
+<div class="wrap">
+<form id="f" class="card" autocomplete="off">
+<div class="head"><div><h2>Job posting</h2><p class="sub">Title and description are required.</p></div>
+<div class="ring" id="ring"><i id="ringn">0%</i></div></div>
+<label>Job title <em id="c_title">0</em></label><input type="text" id="title" placeholder="e.g. Data Entry Clerk - Work From Home">
+<label>Company profile <em id="c_company_profile">0</em></label><textarea id="company_profile" rows="3" placeholder="About the company..."></textarea>
+<label>Job description <em id="c_description">0</em></label><textarea id="description" rows="5" placeholder="Paste the full description..."></textarea>
+<label>Requirements <em id="c_requirements">0</em></label><textarea id="requirements" rows="3" placeholder="Skills, qualifications..."></textarea>
+<div class="row">
+<div><label>Employment</label><select id="employment_type"><option>Unknown</option><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Temporary</option><option>Other</option></select></div>
+<div><label>Experience</label><select id="required_experience"><option>Unknown</option><option>Not Applicable</option><option>Internship</option><option>Entry level</option><option>Associate</option><option>Mid-Senior level</option><option>Director</option><option>Executive</option></select></div>
+<div><label>Education</label><select id="required_education"><option>Unknown</option><option>High School or equivalent</option><option>Associate Degree</option><option>Bachelor's Degree</option><option>Master's Degree</option><option>Doctorate</option><option>Certification</option></select></div>
+</div>
+<div class="checks">
+<label class="chip" style="margin:0"><input type="checkbox" id="telecommuting"> Remote</label>
+<label class="chip" style="margin:0"><input type="checkbox" id="has_company_logo"> Company logo</label>
+<label class="chip" style="margin:0"><input type="checkbox" id="has_questions"> Screening questions</label>
+</div>
+<div class="btns">
+<button class="p" type="submit" id="btn">Analyze posting</button>
+<button class="g" type="reset" id="clr">Clear</button>
+<span class="kbd">Ctrl/Cmd + Enter</span>
+</div>
+<div id="err"></div>
+</form>
+
+<div class="side">
+<div class="card res" id="rescard" hidden>
+<h2>Model result</h2>
+<div id="scan" class="scan" hidden><div class="beam"></div><div id="step"></div></div>
+<div id="out" hidden>
+<div class="gauge" id="g"><div class="in"><b id="num">0%</b><small>fraud risk</small></div></div>
+<div id="v" class="verdict"></div>
+<div class="split"><div><small>Fraud probability</small><b id="pf"></b></div><div><small>Legit probability</small><b id="pl"></b></div></div>
+<p class="note">A statistical estimate, not a guarantee. Always verify the employer and never pay to get a job.</p>
+<div class="hist" id="hist"></div>
+</div></div>
+
+<div class="card">
+<h2>&#128269; Live red-flag scanner</h2>
+<p class="sub">Updates as you type. Quick keyword check, separate from the model.</p>
+<div class="bar"><i id="lvlbar"></i></div>
+<div class="lvl"><span>Warning level</span><b id="lvltxt">Nothing to scan yet</b></div>
+<ul id="flags"></ul>
+<div id="clean" class="clean" hidden></div>
+<h2 style="margin-top:20px">Trust checklist</h2>
+<ul id="checks"></ul>
+</div>
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const TEXT=["title","company_profile","description","requirements"];
+const ids=[...TEXT,"employment_type","required_experience","required_education"];
+const chk=["telecommuting","has_company_logo","has_questions"];
+const RULES=[
+{n:"Asks for money upfront",i:"\u{1F4B8}",w:3,re:/(registration|processing|training|security|application|admin(istration)?) fee|pay (a |the )?fee|deposit|send (us )?money|wire transfer|western union|gift cards?|crypto(currency)? payment/gi},
+{n:"Asks for sensitive details",i:"\u{1F512}",w:3,re:/bank (account|details|info)|\bssn\b|social security|credit card|card number|passport copy|id (copy|card)|aadhaar|pan card/gi},
+{n:"Too-good-to-be-true pay",i:"\u{1F911}",w:2,re:/\$\s?\d[\d,]{2,}\s*(per|a|\/)\s*(day|week)|earn up to|make money fast|unlimited earning|guaranteed (income|salary)|easy money/gi},
+{n:"Fake urgency",i:"⏰",w:1,re:/apply now|limited (seats|spots|positions|slots)|immediate(ly)? (start|hiring|joining)|urgent(ly)?|act fast|hurry/gi},
+{n:"No effort needed",i:"\u{1F6CB}️",w:1,re:/no experience (needed|required|necessary)|no interview|anyone can (apply|do)|no skills? (needed|required)/gi},
+{n:"Moves chat off-platform",i:"\u{1F4AC}",w:2,re:/whatsapp|telegram|signal app|@gmail\.com|@yahoo\.com|@hotmail\.com|@outlook\.com|text us|dm us/gi}
+];
+const SAMPLES=[
+{title:"Software Engineer - Backend",company_profile:"We build logistics software used by thousands of customers across Europe. Our engineering team is 40 people across three offices.",description:"Join our platform team to design and maintain Python REST services. Responsibilities include code reviews, improving our CI/CD pipeline, and collaborating with product managers and frontend engineers on new features.",requirements:"Bachelor's degree in Computer Science or related field. 2+ years of experience with Python, SQL and Docker.",employment_type:"Full-time",required_experience:"Mid-Senior level",required_education:"Bachelor's Degree",has_company_logo:true,has_questions:true,telecommuting:false},
+{title:"Data Entry Clerk - Work From Home",company_profile:"",description:"Earn $5000 per week from home! No experience needed. Immediate start. Send your bank details and a registration fee of $50 to secure your position. Limited seats, apply now! Contact us on WhatsApp.",requirements:"Must have a computer. No interview required.",employment_type:"Other",required_experience:"Not Applicable",required_education:"Unknown",has_company_logo:false,has_questions:false,telecommuting:true},
+{title:"",company_profile:"",description:"",requirements:"",employment_type:"Unknown",required_experience:"Unknown",required_education:"Unknown",has_company_logo:false,has_questions:false,telecommuting:false}
+];
+let typing=0;
+function setAll(s){for(const k in s){const e=$(k);if(e.type==="checkbox")e.checked=s[k];else if(!TEXT.includes(k))e.value=s[k]}syncChips()}
+function demo(i){
+const s=SAMPLES[i];const my=++typing;setAll(s);
+let pos=0;const mx=Math.max(...TEXT.map(k=>s[k].length),1);
+TEXT.forEach(k=>$(k).value="");
+(function tick(){if(my!==typing)return;pos=Math.min(pos+9,mx);
+TEXT.forEach(k=>$(k).value=s[k].slice(0,pos));update();
+if(pos<mx)requestAnimationFrame(tick)})();
+if(i===2)$("title").focus();
+}
+function syncChips(){chk.forEach(k=>$(k).closest(".chip").classList.toggle("on",$(k).checked))}
+function vals(){const v={};ids.forEach(k=>v[k]=$(k).value.trim());chk.forEach(k=>v[k]=$(k).checked?1:0);return v}
+function update(){
+const v=vals();
+TEXT.forEach(k=>$("c_"+k).textContent=v[k].length+" chars");
+const filled=TEXT.filter(k=>v[k]).length;const pct=Math.round(filled/TEXT.length*100);
+$("ring").style.setProperty("--p",pct);$("ringn").textContent=pct+"%";
+const all=TEXT.map(k=>v[k]).join(" ");
+const flags=[];let score=0;
+RULES.forEach(r=>{const m=all.match(r.re);if(m){const u=[...new Set(m.map(x=>x.toLowerCase().trim()))].slice(0,4);flags.push({r,u});score+=r.w}});
+const lv=Math.min(100,score*20);
+const bar=$("lvlbar");bar.style.width=(all?Math.max(lv,6):0)+"%";
+bar.style.background=lv>=60?"var(--bad)":lv>=20?"var(--warn)":"var(--ok)";
+$("lvltxt").textContent=!all?"Nothing to scan yet":lv>=60?"High - several scam signals":lv>=20?"Medium - be careful":"Low - no common scam phrases";
+const ul=$("flags");ul.innerHTML="";
+flags.forEach(f=>{const li=document.createElement("li");li.className="flag";
+const b=document.createElement("b");b.textContent=f.r.i+" "+f.r.n;li.appendChild(b);
+f.u.forEach(h=>{const s=document.createElement("span");s.className="hit";s.textContent=h;li.appendChild(s)});ul.appendChild(li)});
+const cl=$("clean");cl.hidden=!(all.length>40&&!flags.length);cl.textContent="✓ No common scam phrases found in the text.";
+const C=[
+[v.company_profile.length>=60,"Company is described"],
+[v.description.length>=200,"Detailed job description"],
+[v.requirements.length>=30,"Real requirements listed"],
+[!!v.has_company_logo,"Company logo present"],
+[!!v.has_questions,"Screening questions included"],
+[all.length>0&&!flags.length,"No scam phrases detected"]];
+const cu=$("checks");cu.innerHTML="";
+C.forEach(([ok,t])=>{const li=document.createElement("li");li.className="chk"+(ok?" ok":"");
+li.innerHTML='<span class="dot">'+(ok?"✓":"")+'</span>';const s=document.createElement("span");s.textContent=t;li.appendChild(s);cu.appendChild(li)});
+return flags;
+}
+ids.forEach(k=>$(k).addEventListener("input",update));
+chk.forEach(k=>$(k).addEventListener("change",()=>{syncChips();update()}));
+$("f").addEventListener("reset",()=>{typing++;setTimeout(()=>{syncChips();update();$("err").textContent="";$("rescard").hidden=true},0)});
+function animate(target){const g=$("g"),n=$("num");const t0=performance.now();
+(function step(t){const k=Math.min((t-t0)/900,1);const c=target*(1-Math.pow(1-k,3));g.style.setProperty("--p",c);n.textContent=Math.round(c)+"%";if(k<1)requestAnimationFrame(step)})(t0)}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const HIST=[];
+function drawHist(){const h=$("hist");h.innerHTML="";if(HIST.length<2)return;
+HIST.slice(-5).reverse().forEach(x=>{const b=document.createElement("button");b.type="button";
+b.textContent=(x.p.title||"Untitled").slice(0,22);const s=document.createElement("span");s.textContent=Math.round(x.f*100)+"%";
+s.style.color=x.f>=.7?"#f87171":x.f>=.4?"#fbbf24":"#4ade80";b.appendChild(s);
+b.onclick=()=>{typing++;ids.forEach(k=>$(k).value=x.p[k]);chk.forEach(k=>$(k).checked=!!x.p[k]);syncChips();update()};
+h.appendChild(b)})}
+async function run(){
+const p=vals();const err=$("err");err.textContent="";
+let bad=false;["title","description"].forEach(k=>{const e=$(k);e.classList.remove("bad-in");if(!p[k]){void e.offsetWidth;e.classList.add("bad-in");bad=true}});
+if(bad){err.textContent="Please fill in the job title and description.";return}
+const btn=$("btn");btn.disabled=true;btn.textContent="Scanning...";
+$("rescard").hidden=false;$("out").hidden=true;$("scan").hidden=false;
+$("rescard").scrollIntoView({behavior:"smooth",block:"nearest"});
+const steps=["Reading the posting...","Cleaning and tokenizing text...","Matching language patterns...","Running the model..."];
+let si=0;$("step").textContent=steps[0];
+const iv=setInterval(()=>{si=Math.min(si+1,steps.length-1);$("step").textContent=steps[si]},450);
+try{
+const [r]=await Promise.all([fetch("/predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)}),sleep(1900)]);
+if(!r.ok)throw new Error("Server error "+r.status);
+const d=await r.json();const f=d.fraud_probability;
+$("scan").hidden=true;$("out").hidden=false;
+const v=$("v"),g=$("g");
+if(f>=.7){v.className="verdict fraud";v.textContent="Likely fraudulent";g.style.setProperty("--c","#ef4444")}
+else if(f>=.4){v.className="verdict risky";v.textContent="Suspicious - verify carefully";g.style.setProperty("--c","#f59e0b")}
+else{v.className="verdict safe";v.textContent="Looks legitimate";g.style.setProperty("--c","#22c55e")}
+animate(f*100);
+$("pf").textContent=(f*100).toFixed(1)+"%";$("pl").textContent=(d.legit_probability*100).toFixed(1)+"%";
+HIST.push({p,f});drawHist();
+}catch(e){$("rescard").hidden=true;err.textContent="Could not get a prediction: "+e.message}
+clearInterval(iv);btn.disabled=false;btn.textContent="Analyze posting";
+}
+$("f").addEventListener("submit",e=>{e.preventDefault();run()});
+document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter"){e.preventDefault();run()}});
+syncChips();update();
+</script></body></html>
